@@ -14,8 +14,13 @@
   <modules>
     <module>chaos-server</module>
     <module>chaos-server-starter</module>
-    <module>chaos-client-starter</module>
-      <module>chaos-models</module>
+    <module>chaos-models</module>
+    <module>order</module>
+    <module>warehouse</module>
+    <module>clients</module>
+    <module>chaos-clients-strater</module>
+    <module>e2e</module>
+    <module>delivery</module>
   </modules>
 
   <properties>

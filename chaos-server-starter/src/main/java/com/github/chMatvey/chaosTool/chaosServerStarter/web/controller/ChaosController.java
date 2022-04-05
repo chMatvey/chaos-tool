@@ -1,7 +1,8 @@
 package com.github.chMatvey.chaosTool.chaosServerStarter.web.controller;
 
+import com.github.chMatvey.chaosTool.chaosModels.ChaosResponse;
 import com.github.chMatvey.chaosTool.chaosModels.CreateRequest;
-import com.github.chMatvey.chaosTool.chaosModels.CreateResponse;
+import com.github.chMatvey.chaosTool.chaosModels.UpdateRequest;
 import com.github.chMatvey.chaosTool.chaosServerStarter.service.ChaosService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,12 @@ public record ChaosController(ChaosService chaosService) {
     }
 
     @PostMapping
-    public ResponseEntity<CreateResponse> create(@RequestBody CreateRequest createRequest) {
+    public ResponseEntity<ChaosResponse> create(@RequestBody CreateRequest createRequest) {
         return ok(chaosService.create(createRequest));
+    }
+
+    @PutMapping
+    public ResponseEntity<ChaosResponse> update(@RequestBody UpdateRequest createRequest) {
+        return ok(chaosService.update(createRequest));
     }
 }
