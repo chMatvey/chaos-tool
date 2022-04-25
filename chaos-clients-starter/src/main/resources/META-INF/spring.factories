@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.github.chMatvey.chaosTool.chaosClientsStarter.ßStarterConf
+  com.github.chMatvey.chaosTool.chaosClientsStarter.StarterConf
