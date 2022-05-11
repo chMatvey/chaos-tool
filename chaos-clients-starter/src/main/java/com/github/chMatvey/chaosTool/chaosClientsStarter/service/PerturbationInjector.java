@@ -1,4 +1,4 @@
-package com.github.chMatvey.chaosTool.chaosClientsStarter;
+package com.github.chMatvey.chaosTool.chaosClientsStarter.service;
 
 import com.github.chMatvey.chaosTool.chaosModels.ChaosResponse;
 

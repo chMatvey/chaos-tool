@@ -1,11 +1,11 @@
 package com.github.chMatvey.chaosTool.chaosServerStarter.service;
 
-import com.github.chMatvey.chaosTool.chaosModels.CreateRequest;
+import com.github.chMatvey.chaosTool.chaosModels.ChaosCreateRequest;
 import com.github.chMatvey.chaosTool.chaosModels.ChaosResponse;
-import com.github.chMatvey.chaosTool.chaosModels.UpdateRequest;
+import com.github.chMatvey.chaosTool.chaosModels.ChaosUpdateRequest;
 
 public interface ChaosService {
-    ChaosResponse create(CreateRequest createRequest);
+    ChaosResponse create(ChaosCreateRequest createRequest);
 
-    ChaosResponse update(UpdateRequest updateRequest);
+    ChaosResponse update(ChaosUpdateRequest updateRequest);
 }

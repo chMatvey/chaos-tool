@@ -1,2 +1,6 @@
 server:
-  port: 9000
+  port: 10501
+
+spring:
+  application:
+    name: Chaos Server
