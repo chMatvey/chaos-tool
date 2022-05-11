@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChaosCreateRequest {
+public class ChaosCreateRequest implements ChaosRequest {
     private Integer sessionId;
     private String sourceServiceName;
     private String targetServiceName;

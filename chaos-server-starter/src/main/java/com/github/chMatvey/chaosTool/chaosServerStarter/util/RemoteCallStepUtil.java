@@ -4,14 +4,16 @@ import com.github.chMatvey.chaosTool.chaosModels.ChaosCreateRequest;
 import com.github.chMatvey.chaosTool.chaosModels.ChaosUpdateRequest;
 import com.github.chMatvey.chaosTool.chaosServerStarter.model.RemoteCallStep;
 
+import static com.github.chMatvey.chaosTool.chaosServerStarter.util.ErrorCodeUtil.DEFAULT_ERROR_CODES;
+
 public class RemoteCallStepUtil {
     public static RemoteCallStep fromCreateRequest(ChaosCreateRequest createRequest) {
         return new RemoteCallStep(
                 createRequest.getSourceServiceName(),
                 createRequest.getTargetServiceName(),
-                createRequest.getServiceRole(),
                 createRequest.getUri(),
-                createRequest.getMethod()
+                createRequest.getMethod(),
+                DEFAULT_ERROR_CODES
         );
     }
 
@@ -19,9 +21,9 @@ public class RemoteCallStepUtil {
         return new RemoteCallStep(
                 updateRequest.getSourceServiceName(),
                 updateRequest.getTargetServiceName(),
-                updateRequest.getServiceRole(),
                 updateRequest.getUri(),
-                updateRequest.getMethod()
+                updateRequest.getMethod(),
+                DEFAULT_ERROR_CODES
         );
     }
 }

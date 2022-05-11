@@ -36,7 +36,6 @@ public class ChaosServletInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         log.info("Intercepted HTTP servlet request");
-
         ArrayList<String> headersNames = Collections.list(request.getHeaderNames());
 
         boolean hasTestCaseIdHeader = headersNames.stream().anyMatch(headerName -> headerName.equals(CHAOS_TEST_CASE_ID_HEADER));
@@ -48,6 +47,9 @@ public class ChaosServletInterceptor implements HandlerInterceptor {
         request.setAttribute(CHAOS_SESSION_ID_HEADER, chaosResponse.getSessionId());
         request.setAttribute(CHAOS_TEST_CASE_ID_HEADER, chaosResponse.getTestCaseId());
         request.setAttribute(CHAOS_TEST_CASE_STEP_HEADER, chaosResponse.getTestCaseStep());
+
+        response.setHeader(CHAOS_SESSION_ID_HEADER, chaosResponse.getSessionId().toString());
+        response.setHeader(CHAOS_TEST_CASE_ID_HEADER, chaosResponse.getTestCaseId().toString());
 
         return true;
     }
