@@ -1,9 +1,6 @@
 package com.github.chMatvey.chaosTool.chaosServerStarter.service;
 
-import com.github.chMatvey.chaosTool.chaosModels.ChaosCreateRequest;
-import com.github.chMatvey.chaosTool.chaosModels.ChaosResponse;
-import com.github.chMatvey.chaosTool.chaosModels.ChaosSessionInfoResponse;
-import com.github.chMatvey.chaosTool.chaosModels.ChaosUpdateRequest;
+import com.github.chMatvey.chaosTool.chaosModels.*;
 import com.github.chMatvey.chaosTool.chaosServerStarter.model.ChaosSessionInfo;
 import com.github.chMatvey.chaosTool.chaosServerStarter.model.RemoteCallStep;
 import org.springframework.stereotype.Service;
@@ -35,16 +32,19 @@ public class inMemoryChaosService implements ChaosService {
 
         if (isFirstTestCase(testCaseId)) {
             ChaosSessionInfo sessionInfo = new ChaosSessionInfo();
-            sessionInfo.addServiceCallStep(fromCreateRequest(createRequest));
-            sessionInfo.incrementTestCaseCount();
+            RemoteCallStep callStep = fromCreateRequest(createRequest);
+            sessionInfo.addServiceCallStep(callStep);
+            sessionInfo.updateTestCaseCount(callStep);
             chaosSessions.put(sessionId, sessionInfo);
         } else {
             ChaosSessionInfo sessionInfo = chaosSessions.get(sessionId);
             RemoteCallStep callStep = sessionInfo.firstCallStep();
             if (callStep.equalCurrentRequest(createRequest)) {
                 injectError = true;
-                errorCode = callStep.injectedErrorCode().poll();
+                errorCode = Optional.ofNullable(callStep.injectedErrorCodes().poll())
+                        .orElseThrow(() -> new RuntimeException("Cannot extract error code from Chaos session info"));
                 sessionInfo.removeFirstCallStepIfErrorCodeExpired();
+                sessionInfo.updateFaultInjectionInfo(errorCode);
             }
         }
 
@@ -63,15 +63,22 @@ public class inMemoryChaosService implements ChaosService {
         Integer errorCode = null;
         ChaosSessionInfo sessionInfo = chaosSessions.get(updateRequest.getSessionId());
 
-        if (isFirstTestCase(updateRequest.getTestCaseId()) && updateRequest.getServiceRole() == SENDER) {
-            sessionInfo.addServiceCallStep(fromUpdateRequest(updateRequest));
-            sessionInfo.incrementTestCaseCount();
+        if (isFirstTestCase(updateRequest.getTestCaseId())) {
+            if (updateRequest.getServiceRole() == SENDER) {
+                RemoteCallStep callStep = fromUpdateRequest(updateRequest);
+                sessionInfo.addServiceCallStep(callStep);
+                sessionInfo.updateTestCaseCount(callStep);
+            }
         } else {
             RemoteCallStep callStep = sessionInfo.firstCallStep();
             if (callStep.equalCurrentRequest(updateRequest)) {
                 injectError = true;
-                errorCode = callStep.injectedErrorCode().poll();
+                errorCode = Optional.ofNullable(callStep.injectedErrorCodes().poll())
+                        .orElseThrow(() -> new RuntimeException("Cannot extract error code from Chaos session info"));
                 sessionInfo.removeFirstCallStepIfErrorCodeExpired();
+                sessionInfo.updateFaultInjectionInfo(errorCode);
+            } else {
+                sessionInfo.resetFaultInjectionInfo();
             }
         }
 
@@ -89,14 +96,23 @@ public class inMemoryChaosService implements ChaosService {
         return ofNullable(toResponse(chaosSessions.get(id)));
     }
 
+    @Override
+    public Optional<WasFaultInjectedResponse> wasFaultInjected(Integer chaosSessionId) {
+        ChaosSessionInfo chaosSessionInfo = chaosSessions.get(chaosSessionId);
+        if (chaosSessionInfo == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(chaosSessionInfo.wasFaultInjected());
+        }
+    }
+
     private int generateNewSessionId() {
         return lastId.incrementAndGet();
     }
 
     private int getTestCaseId(int sessionId) {
         ChaosSessionInfo sessionInfo = chaosSessions.get(sessionId);
-        int firstErrorInjectionTestCaseId = FIRST_TEST_CASE_ID + 1;
-        return sessionInfo.testCaseCount() - sessionInfo.servicesCallStepsCount() + firstErrorInjectionTestCaseId;
+        return sessionInfo.testCaseCount() - sessionInfo.servicesCallStepsCount() + FIRST_TEST_CASE_ID;
     }
 
     private boolean isFirstTestCase(int testCaseId) {

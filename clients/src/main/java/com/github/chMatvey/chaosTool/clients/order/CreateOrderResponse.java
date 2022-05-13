@@ -1,4 +1,4 @@
-package com.github.chMatvey.chaosTool.order.dto;
+package com.github.chMatvey.chaosTool.clients.order;
 
 public record CreateOrderResponse(
         Long id,

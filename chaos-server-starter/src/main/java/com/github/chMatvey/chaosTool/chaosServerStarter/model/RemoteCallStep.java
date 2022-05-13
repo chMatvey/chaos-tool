@@ -9,7 +9,7 @@ public record RemoteCallStep(
         String targetServiceName,
         String uri,
         String method,
-        Queue<Integer> injectedErrorCode
+        Queue<Integer> injectedErrorCodes
 ) {
     public boolean equalCurrentRequest(ChaosRequest chaosRequest) {
         return equalsIgnoreCase(sourceServiceName, chaosRequest.getSourceServiceName()) &&

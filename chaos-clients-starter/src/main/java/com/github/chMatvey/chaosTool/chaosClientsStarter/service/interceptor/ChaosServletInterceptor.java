@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
-import static com.github.chMatvey.chaosTool.chaosClientsStarter.ChaosClientStarterConfiguration.*;
+import static com.github.chMatvey.chaosTool.chaosModels.ChaosHeaders.*;
 import static com.github.chMatvey.chaosTool.chaosModels.ServiceRole.RECIPIENT;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -35,6 +35,10 @@ public class ChaosServletInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        if (request.getRequestURI().contains("error")) {
+            return false;
+        }
+
         log.info("Intercepted HTTP servlet request");
         ArrayList<String> headersNames = Collections.list(request.getHeaderNames());
 
@@ -42,7 +46,8 @@ public class ChaosServletInterceptor implements HandlerInterceptor {
         ChaosResponse chaosResponse = hasTestCaseIdHeader ? sendChaosUpdateRequest(request) : sendChaosCreateRequest(request);
 
         if (perturbationInjector.canInjectError(chaosResponse)) {
-            perturbationInjector.injectError(chaosResponse);
+            response.setStatus(chaosResponse.getErrorCode());
+            return false;
         }
         request.setAttribute(CHAOS_SESSION_ID_HEADER, chaosResponse.getSessionId());
         request.setAttribute(CHAOS_TEST_CASE_ID_HEADER, chaosResponse.getTestCaseId());

@@ -1,9 +1,6 @@
 package com.github.chMatvey.chaosTool.chaosServerStarter.web.controller;
 
-import com.github.chMatvey.chaosTool.chaosModels.ChaosCreateRequest;
-import com.github.chMatvey.chaosTool.chaosModels.ChaosResponse;
-import com.github.chMatvey.chaosTool.chaosModels.ChaosSessionInfoResponse;
-import com.github.chMatvey.chaosTool.chaosModels.ChaosUpdateRequest;
+import com.github.chMatvey.chaosTool.chaosModels.*;
 import com.github.chMatvey.chaosTool.chaosServerStarter.service.ChaosService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +30,11 @@ public record ChaosController(ChaosService chaosService) {
     public ResponseEntity<ChaosSessionInfoResponse> chaosSessionInfo(@PathVariable Integer id) {
         log.info("REST request to GET Chaos Testing Session");
         return of(chaosService.get(id));
+    }
+
+    @GetMapping("/was-fault-injected/{id}")
+    public ResponseEntity<WasFaultInjectedResponse> wasFaultInjected(@PathVariable Integer id) {
+        log.info("REST request to GET was Fault injected info");
+        return of(chaosService.wasFaultInjected(id));
     }
 }

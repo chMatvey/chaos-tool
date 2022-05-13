@@ -21,6 +21,7 @@
     <module>chaos-clients-starter</module>
     <module>e2e</module>
     <module>delivery</module>
+    <module>chaos-test-util</module>
   </modules>
 
   <properties>

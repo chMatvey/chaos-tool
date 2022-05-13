@@ -17,7 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static com.github.chMatvey.chaosTool.chaosClientsStarter.ChaosClientStarterConfiguration.*;
+import static com.github.chMatvey.chaosTool.chaosModels.ChaosHeaders.*;
 import static com.github.chMatvey.chaosTool.chaosModels.ServiceRole.SENDER;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
