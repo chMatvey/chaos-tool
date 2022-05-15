@@ -21,6 +21,7 @@
             <groupId>com.github.chMatvey</groupId>
             <artifactId>chaos-test-util</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.chMatvey</groupId>
