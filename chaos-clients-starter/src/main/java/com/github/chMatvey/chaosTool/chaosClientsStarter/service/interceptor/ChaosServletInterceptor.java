@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +23,8 @@ import static com.github.chMatvey.chaosTool.chaosModels.ChaosHeaders.*;
 import static com.github.chMatvey.chaosTool.chaosModels.ServiceRole.RECIPIENT;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
+import static org.springframework.web.context.request.RequestContextHolder.getRequestAttributes;
+import static org.springframework.web.context.request.RequestContextHolder.setRequestAttributes;
 
 @Component
 @RequiredArgsConstructor
@@ -55,6 +58,9 @@ public class ChaosServletInterceptor implements HandlerInterceptor {
 
         response.setHeader(CHAOS_SESSION_ID_HEADER, chaosResponse.getSessionId().toString());
         response.setHeader(CHAOS_TEST_CASE_ID_HEADER, chaosResponse.getTestCaseId().toString());
+
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) getRequestAttributes();
+        setRequestAttributes(servletRequestAttributes, true);
 
         return true;
     }

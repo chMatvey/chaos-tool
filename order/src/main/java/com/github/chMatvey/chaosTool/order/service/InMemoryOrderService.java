@@ -1,20 +1,16 @@
 package com.github.chMatvey.chaosTool.order.service;
 
-import com.github.chMatvey.chaosTool.clients.delivery.DeliveryClient;
-import com.github.chMatvey.chaosTool.clients.delivery.DeliveryRequest;
-import com.github.chMatvey.chaosTool.clients.delivery.DeliveryResponse;
 import com.github.chMatvey.chaosTool.clients.order.CreateOrderRequest;
 import com.github.chMatvey.chaosTool.clients.order.CreateOrderResponse;
-import com.github.chMatvey.chaosTool.clients.warehouse.WarehouseClient;
-import com.github.chMatvey.chaosTool.clients.warehouse.WarehouseRequest;
-import com.github.chMatvey.chaosTool.clients.warehouse.WarehouseResponse;
 import com.github.chMatvey.chaosTool.order.model.Order;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,49 +20,32 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RequiredArgsConstructor
 @Slf4j
 public class InMemoryOrderService implements OrderService {
-    private final WarehouseClient warehouseClient;
-    private final DeliveryClient deliveryClient;
+    private final RemoteCallService remoteCallService;
 
     private final Map<Long, Order> orderMap = new ConcurrentHashMap<>();
     private final AtomicLong lastId = new AtomicLong(0);
 
+    @SneakyThrows
     @Override
     public CreateOrderResponse create(CreateOrderRequest request) {
-        String productName = request.name();
+        CompletableFuture<Boolean> isStockFuture = remoteCallService.inStock(request.name());
+        CompletableFuture<Boolean> canDeliverFuture = remoteCallService.canDeliver(request.name());
 
-        WarehouseResponse inStockResponse = warehouseClient.inStock(
-                new WarehouseRequest(productName)
-        );
-        if (!inStockResponse.inStock()) {
+        if (!isStockFuture.get()) {
             throw new ResponseStatusException(NOT_FOUND, "Product not found on warehouse");
         }
 
-        boolean canDeliver = false;
-        try {
-            DeliveryResponse deliveryResponse = deliveryClient.canDeliver(
-                    new DeliveryRequest(productName)
-            );
-            canDeliver = deliveryResponse.canDeliver();
-        } catch (Exception exception) {
-            log.warn("Delivery service return error {}", exception.getMessage());
-        }
-
-        long orderId = generateNewId();
         Order order = Order.builder()
-                .id(orderId)
-                .name(productName)
+                .id(lastId.incrementAndGet())
+                .name(request.name())
                 .build();
         orderMap.put(order.getId(), order);
 
         return new CreateOrderResponse(
                 order.getId(),
                 request.name(),
-                canDeliver,
+                canDeliverFuture.get(),
                 "Order successfully created"
         );
-    }
-
-    private long generateNewId() {
-        return lastId.incrementAndGet();
     }
 }

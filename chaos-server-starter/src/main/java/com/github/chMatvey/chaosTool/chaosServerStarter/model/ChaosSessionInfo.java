@@ -45,9 +45,9 @@ public class ChaosSessionInfo {
         }
     }
 
-    public void updateFaultInjectionInfo(int errorCode) {
+    public void updateFaultInjectionInfo(int errorCode, String serviceName, Integer testCaseId) {
         this.wasFaultInjected.set(
-                new WasFaultInjectedResponse(true, errorCode)
+                new WasFaultInjectedResponse(true, errorCode, serviceName, testCaseId)
         );
     }
 

@@ -6,6 +6,7 @@ import com.github.chMatvey.chaosTool.chaosServerStarter.model.RemoteCallStep;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +45,7 @@ public class inMemoryChaosService implements ChaosService {
                 errorCode = Optional.ofNullable(callStep.injectedErrorCodes().poll())
                         .orElseThrow(() -> new RuntimeException("Cannot extract error code from Chaos session info"));
                 sessionInfo.removeFirstCallStepIfErrorCodeExpired();
-                sessionInfo.updateFaultInjectionInfo(errorCode);
+                sessionInfo.updateFaultInjectionInfo(errorCode, createRequest.getTargetServiceName(), testCaseId);
             }
         }
 
@@ -63,22 +64,22 @@ public class inMemoryChaosService implements ChaosService {
         Integer errorCode = null;
         ChaosSessionInfo sessionInfo = chaosSessions.get(updateRequest.getSessionId());
 
-        if (isFirstTestCase(updateRequest.getTestCaseId())) {
-            if (updateRequest.getServiceRole() == SENDER) {
+        if (updateRequest.getServiceRole() == SENDER) {
+            if (isFirstTestCase(updateRequest.getTestCaseId())) {
                 RemoteCallStep callStep = fromUpdateRequest(updateRequest);
                 sessionInfo.addServiceCallStep(callStep);
                 sessionInfo.updateTestCaseCount(callStep);
-            }
-        } else {
-            RemoteCallStep callStep = sessionInfo.firstCallStep();
-            if (callStep.equalCurrentRequest(updateRequest)) {
-                injectError = true;
-                errorCode = Optional.ofNullable(callStep.injectedErrorCodes().poll())
-                        .orElseThrow(() -> new RuntimeException("Cannot extract error code from Chaos session info"));
-                sessionInfo.removeFirstCallStepIfErrorCodeExpired();
-                sessionInfo.updateFaultInjectionInfo(errorCode);
             } else {
-                sessionInfo.resetFaultInjectionInfo();
+                RemoteCallStep callStep = sessionInfo.firstCallStep();
+                WasFaultInjectedResponse wasFaultInjected = sessionInfo.wasFaultInjected();
+                if (callStep.equalCurrentRequest(updateRequest) &&
+                        !Objects.equals(wasFaultInjected.getTestCaseId(), updateRequest.getTestCaseId())) {
+                    injectError = true;
+                    errorCode = Optional.ofNullable(callStep.injectedErrorCodes().poll())
+                            .orElseThrow(() -> new RuntimeException("Cannot extract error code from Chaos session info"));
+                    sessionInfo.removeFirstCallStepIfErrorCodeExpired();
+                    sessionInfo.updateFaultInjectionInfo(errorCode, updateRequest.getTargetServiceName(), updateRequest.getTestCaseId());
+                }
             }
         }
 
@@ -96,6 +97,7 @@ public class inMemoryChaosService implements ChaosService {
         return ofNullable(toResponse(chaosSessions.get(id)));
     }
 
+    @Deprecated
     @Override
     public Optional<WasFaultInjectedResponse> wasFaultInjected(Integer chaosSessionId) {
         ChaosSessionInfo chaosSessionInfo = chaosSessions.get(chaosSessionId);

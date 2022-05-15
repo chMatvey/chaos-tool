@@ -12,8 +12,10 @@ import lombok.NoArgsConstructor;
 public class WasFaultInjectedResponse {
     private Boolean wasFaultInjected;
     private Integer errorCodeInjected;
+    private String serviceName;
+    private Integer testCaseId;
 
     public static WasFaultInjectedResponse noInjected() {
-        return new WasFaultInjectedResponse(false, null);
+        return new WasFaultInjectedResponse(false, null, null, null);
     }
 }

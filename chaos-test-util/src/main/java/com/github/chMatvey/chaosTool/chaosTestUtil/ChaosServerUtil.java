@@ -14,6 +14,7 @@ public class ChaosServerUtil {
         return new HttpGet(CHAOS_SERVER_URL + "/" + sessionId);
     }
 
+    @Deprecated
     static HttpGet createWasFaultInjectedRequest(int sessionId) {
         return new HttpGet(CHAOS_SERVER_URL + "/was-fault-injected/" + sessionId);
     }
@@ -28,6 +29,7 @@ public class ChaosServerUtil {
         }
     }
 
+    @Deprecated
     static WasFaultInjectedResponse parseWasFaultInjectedResponse(HttpResponse response) {
         try {
             String resultJsonString = EntityUtils.toString(response.getEntity());
