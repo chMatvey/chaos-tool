@@ -1,6 +1,8 @@
 package com.github.chMatvey.chaosTool.chaosTestUtil;
 
 import com.github.chMatvey.chaosTool.chaosModels.ChaosSessionInfoResponse;
+import com.github.chMatvey.chaosTool.chaosModels.WasFaultInjectedResponse;
+import com.github.chMatvey.chaosTool.chaosTestUtil.model.InjectedFaultInfo;
 import lombok.SneakyThrows;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -11,18 +13,19 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import java.util.function.Consumer;
 
 import static com.github.chMatvey.chaosTool.chaosModels.ChaosHeaders.CHAOS_SESSION_ID_HEADER;
-import static com.github.chMatvey.chaosTool.chaosTestUtil.ChaosHeadersUtil.getSessionIdFromResponseHeaders;
-import static com.github.chMatvey.chaosTool.chaosTestUtil.ChaosServerUtil.createGetChaosSessionInfoRequest;
-import static com.github.chMatvey.chaosTool.chaosTestUtil.ChaosServerUtil.parseChaosSessionInfoResponse;
+import static com.github.chMatvey.chaosTool.chaosTestUtil.util.ChaosHeadersUtil.getSessionIdFromResponseHeaders;
+import static com.github.chMatvey.chaosTool.chaosTestUtil.util.ChaosServerUtil.*;
 
 public class ChaosTestUtil {
     private static final HttpClient httpClient = HttpClientBuilder.create().build();
+
     private static boolean wasFaultInjected;
+    private static Integer chaosSessionId;
 
     @SneakyThrows
     public static void chaosTest(HttpUriRequest request, Consumer<HttpResponse> handler) {
         HttpResponse response = httpClient.execute(request);
-        Integer chaosSessionId = getSessionIdFromResponseHeaders(response);
+        chaosSessionId = getSessionIdFromResponseHeaders(response);
         wasFaultInjected = false;
 
         handler.accept(response);
@@ -41,15 +44,18 @@ public class ChaosTestUtil {
         }
     }
 
-//    @SneakyThrows
-//    public static boolean wasFaultInjected() {
-//        HttpGet wasFaultInjectedRequest = createWasFaultInjectedRequest(chaosSessionId);
-//        HttpResponse wasFaultInjectedResponse = httpClient.execute(wasFaultInjectedRequest);
-//        WasFaultInjectedResponse wasFaultInjected = parseWasFaultInjectedResponse(wasFaultInjectedResponse);
-//        return wasFaultInjected.getWasFaultInjected();
-//    }
-
     public static boolean wasFaultInjected() {
         return wasFaultInjected;
+    }
+
+    @SneakyThrows
+    public static InjectedFaultInfo injectedFaultInfo() {
+        HttpGet wasFaultInjectedRequest = createWasFaultInjectedRequest(chaosSessionId);
+        HttpResponse wasFaultInjectedResponse = httpClient.execute(wasFaultInjectedRequest);
+        WasFaultInjectedResponse wasFaultInjected = parseWasFaultInjectedResponse(wasFaultInjectedResponse);
+        return InjectedFaultInfo.builder()
+                .serviceName(wasFaultInjected.getServiceName())
+                .errorCode(wasFaultInjected.getErrorCodeInjected())
+                .build();
     }
 }

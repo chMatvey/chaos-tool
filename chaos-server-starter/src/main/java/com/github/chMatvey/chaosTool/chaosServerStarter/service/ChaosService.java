@@ -11,6 +11,5 @@ public interface ChaosService {
 
     Optional<ChaosSessionInfoResponse> get(Integer id);
 
-    @Deprecated
     Optional<WasFaultInjectedResponse> wasFaultInjected(Integer chaosSessionId);
 }

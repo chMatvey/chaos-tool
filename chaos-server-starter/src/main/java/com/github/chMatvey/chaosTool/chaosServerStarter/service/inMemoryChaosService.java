@@ -97,7 +97,6 @@ public class inMemoryChaosService implements ChaosService {
         return ofNullable(toResponse(chaosSessions.get(id)));
     }
 
-    @Deprecated
     @Override
     public Optional<WasFaultInjectedResponse> wasFaultInjected(Integer chaosSessionId) {
         ChaosSessionInfo chaosSessionInfo = chaosSessions.get(chaosSessionId);

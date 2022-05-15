@@ -1,15 +1,16 @@
-package com.github.chMatvey.chaosTool.chaosTestUtil;
+package com.github.chMatvey.chaosTool.chaosTestUtil.util;
 
+import com.github.chMatvey.chaosTool.chaosTestUtil.model.ChaosTestUtilException;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 
 import static com.github.chMatvey.chaosTool.chaosModels.ChaosHeaders.*;
-import static com.github.chMatvey.chaosTool.chaosTestUtil.Util.ofNullableOrThrowError;
+import static com.github.chMatvey.chaosTool.chaosTestUtil.util.Util.ofNullableOrThrowError;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 
 public class ChaosHeadersUtil {
-    static Integer getSessionIdFromResponseHeaders(HttpResponse response) {
+    public static Integer getSessionIdFromResponseHeaders(HttpResponse response) {
         Header header = ofNullableOrThrowError(
                 response.getFirstHeader(CHAOS_SESSION_ID_HEADER),
                 format("Header %s does not present", CHAOS_TEST_CASE_STEP_HEADER)

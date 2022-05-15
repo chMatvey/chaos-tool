@@ -1,4 +1,4 @@
-package com.github.chMatvey.chaosTool.chaosTestUtil;
+package com.github.chMatvey.chaosTool.chaosTestUtil.model;
 
 public class ChaosTestUtilException extends RuntimeException {
     public ChaosTestUtilException(String message) {

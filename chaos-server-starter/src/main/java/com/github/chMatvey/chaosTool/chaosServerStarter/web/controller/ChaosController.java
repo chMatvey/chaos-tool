@@ -32,7 +32,6 @@ public record ChaosController(ChaosService chaosService) {
         return of(chaosService.get(id));
     }
 
-    @Deprecated
     @GetMapping("/was-fault-injected/{id}")
     public ResponseEntity<WasFaultInjectedResponse> wasFaultInjected(@PathVariable Integer id) {
         log.info("REST request to GET was Fault injected info");
