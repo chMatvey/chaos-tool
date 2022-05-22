@@ -24,7 +24,7 @@ public class inMemoryChaosService implements ChaosService {
     public static final int FIRST_TEST_CASE_ID = 1;
 
     @Override
-    public ChaosResponse create(ChaosCreateRequest createRequest) {
+    public ChaosResponse createChaosSession(ChaosCreateRequest createRequest) {
         boolean hasSessionIdHeader = createRequest.getSessionId() != null;
         int sessionId = hasSessionIdHeader ? createRequest.getSessionId() : generateNewSessionId();
         int testCaseId = hasSessionIdHeader ? getTestCaseId(sessionId) : FIRST_TEST_CASE_ID;
@@ -59,7 +59,7 @@ public class inMemoryChaosService implements ChaosService {
     }
 
     @Override
-    public ChaosResponse update(ChaosUpdateRequest updateRequest) {
+    public ChaosResponse updateChaosSession(ChaosUpdateRequest updateRequest) {
         boolean injectError = false;
         Integer errorCode = null;
         ChaosSessionInfo sessionInfo = chaosSessions.get(updateRequest.getSessionId());
@@ -93,7 +93,7 @@ public class inMemoryChaosService implements ChaosService {
     }
 
     @Override
-    public Optional<ChaosSessionInfoResponse> get(Integer id) {
+    public Optional<ChaosSessionInfoResponse> getChaosSessionInfo(Integer id) {
         return ofNullable(toResponse(chaosSessions.get(id)));
     }
 

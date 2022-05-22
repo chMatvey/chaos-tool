@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class InjectedFaultInfo {
-    private String serviceName;
-    private Integer errorCode;
+    private List<String> serviceName;
+    private List<Integer> errorCode;
 }

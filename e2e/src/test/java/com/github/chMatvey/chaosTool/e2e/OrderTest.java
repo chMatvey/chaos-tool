@@ -11,15 +11,16 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static com.github.chMatvey.chaosTool.chaosTestUtil.ChaosTestUtil.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
     public static final String ORDER_SERVICE_URL = "http://localhost:8000/api/v1/order";
     public static final String ORDER_SERVICE_NAME = "Order";
-    public static final String WAREHOUSE_SERVICE_NAME = "Warehouse";
-    public static final String DELIVERY_SERVICE_NAME = "Delivery";
+    public static final String WAREHOUSE_SERVICE_NAME = "warehouse";
+    public static final String DELIVERY_SERVICE_NAME = "delivery";
 
     /**
      * Three services: Order, Warehouse, Delivery
@@ -30,18 +31,21 @@ class OrderTest {
 
         chaosTest(httpRequest, httpResponse -> {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
-
-            if (statusCode == 201) {
-                CreateOrderResponse createOrderResponse = extractCreateOrderResponseBody(httpResponse);
-                if (createOrderResponse.canDeliver()) {
-                    assertFalse(wasFaultInjected());
-                } else {
+            switch (statusCode) {
+                case 201 -> {
+                    CreateOrderResponse createOrderResponse = extractCreateOrderResponseBody(httpResponse);
+                    if (createOrderResponse.canDeliver()) {
+                        assertFalse(wasFaultInjected());
+                    } else {
+                        assertTrue(wasFaultInjected());
+                    }
+                }
+                case 500, 503 -> {
                     assertTrue(wasFaultInjected());
                 }
-            } else if (statusCode == 500 || statusCode == 503) {
-                assertTrue(wasFaultInjected());
-            } else {
-                throw new RuntimeException("Unexpected response status");
+                default -> {
+                    throw new RuntimeException("Unexpected response status");
+                }
             }
         });
     }
@@ -55,24 +59,77 @@ class OrderTest {
 
         chaosTest(httpRequest, httpResponse -> {
             int statusCode = httpResponse.getStatusLine().getStatusCode();
-
-            if (statusCode == 201) {
-                CreateOrderResponse createOrderResponse = extractCreateOrderResponseBody(httpResponse);
-                if (createOrderResponse.canDeliver()) {
-                    assertFalse(wasFaultInjected());
-                } else {
+            switch (statusCode) {
+                case 201 -> {
+                    CreateOrderResponse createOrderResponse = extractCreateOrderResponseBody(httpResponse);
+                    if (createOrderResponse.canDeliver()) {
+                        assertFalse(wasFaultInjected());
+                    } else {
+                        assertTrue(wasFaultInjected());
+                        InjectedFaultInfo faultInfo = injectedFaultInfo();
+                        List<String> servicesNames = faultInfo.getServiceName();
+                        assertEquals(1, servicesNames.size());
+                        assertEquals(DELIVERY_SERVICE_NAME, servicesNames.get(0));
+                    }
+                }
+                case 500, 503 -> {
                     assertTrue(wasFaultInjected());
                     InjectedFaultInfo faultInfo = injectedFaultInfo();
-                    assertTrue(faultInfo.getServiceName().equalsIgnoreCase(DELIVERY_SERVICE_NAME));
+                    List<String> servicesNames = faultInfo.getServiceName();
+                    assertTrue(servicesNames.contains(ORDER_SERVICE_NAME) ||
+                            servicesNames.contains(WAREHOUSE_SERVICE_NAME));
                 }
-            } else if (statusCode == 500 || statusCode == 503) {
-                assertTrue(wasFaultInjected());
-                InjectedFaultInfo faultInfo = injectedFaultInfo();
-                String serviceName = faultInfo.getServiceName();
-                assertTrue(serviceName.equalsIgnoreCase(ORDER_SERVICE_NAME) ||
-                        serviceName.equalsIgnoreCase(WAREHOUSE_SERVICE_NAME));
-            } else {
-                throw new RuntimeException("Unexpected response status");
+                default -> {
+                    throw new RuntimeException("Unexpected response status");
+                }
+            }
+        });
+    }
+
+    /**
+     * Three services: Order, Warehouse, Delivery
+     */
+    @Test
+    void createOrder3() {
+        HttpPost httpRequest = createOrderRequest();
+
+        chaosTest(httpRequest, httpResponse -> {
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            switch (statusCode) {
+                case 201 -> {
+                    CreateOrderResponse createOrderResponse = extractCreateOrderResponseBody(httpResponse);
+                    if (createOrderResponse.canDeliver()) {
+                        assertFalse(wasFaultInjected());
+                    } else {
+                        assertTrue(wasFaultInjected());
+                        InjectedFaultInfo faultInfo = injectedFaultInfo();
+                        List<String> servicesNames = faultInfo.getServiceName();
+                        assertEquals(1, servicesNames.size());
+                        assertEquals(DELIVERY_SERVICE_NAME, servicesNames.get(0));
+                    }
+                }
+                case 404 -> {
+                    assertTrue(wasFaultInjected());
+                    InjectedFaultInfo faultInfo = injectedFaultInfo();
+                    List<String> servicesNames = faultInfo.getServiceName();
+                    List<Integer> errorCodes = faultInfo.getErrorCode();
+                    assertTrue(servicesNames.contains(WAREHOUSE_SERVICE_NAME));
+                    int warehouseIndex = servicesNames.indexOf(WAREHOUSE_SERVICE_NAME);
+                    assertEquals(404, errorCodes.get(warehouseIndex));
+                    if (servicesNames.size() > 1) {
+                        assertTrue(servicesNames.contains(DELIVERY_SERVICE_NAME));
+                    }
+                }
+                case 500, 503 -> {
+                    assertTrue(wasFaultInjected());
+                    InjectedFaultInfo faultInfo = injectedFaultInfo();
+                    List<String> servicesNames = faultInfo.getServiceName();
+                    assertTrue(servicesNames.contains(ORDER_SERVICE_NAME) ||
+                            servicesNames.contains(WAREHOUSE_SERVICE_NAME));
+                }
+                default -> {
+                    throw new RuntimeException("Unexpected response status");
+                }
             }
         });
     }

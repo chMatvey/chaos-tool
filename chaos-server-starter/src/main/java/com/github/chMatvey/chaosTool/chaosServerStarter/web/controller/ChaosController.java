@@ -17,19 +17,19 @@ public record ChaosController(ChaosService chaosService) {
     @PostMapping
     public ResponseEntity<ChaosResponse> create(@RequestBody ChaosCreateRequest createRequest) {
         log.info("REST request to CREATE Chaos Testing Session");
-        return ok(chaosService.create(createRequest));
+        return ok(chaosService.createChaosSession(createRequest));
     }
 
     @PutMapping
     public ResponseEntity<ChaosResponse> update(@RequestBody ChaosUpdateRequest createRequest) {
         log.info("REST request to UPDATE Chaos Testing Session");
-        return ok(chaosService.update(createRequest));
+        return ok(chaosService.updateChaosSession(createRequest));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ChaosSessionInfoResponse> chaosSessionInfo(@PathVariable Integer id) {
         log.info("REST request to GET Chaos Testing Session");
-        return of(chaosService.get(id));
+        return of(chaosService.getChaosSessionInfo(id));
     }
 
     @GetMapping("/was-fault-injected/{id}")

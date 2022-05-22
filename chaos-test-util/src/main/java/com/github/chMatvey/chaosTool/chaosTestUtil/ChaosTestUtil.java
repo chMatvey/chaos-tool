@@ -10,6 +10,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import static com.github.chMatvey.chaosTool.chaosModels.ChaosHeaders.CHAOS_SESSION_ID_HEADER;
@@ -54,8 +55,8 @@ public class ChaosTestUtil {
         HttpResponse wasFaultInjectedResponse = httpClient.execute(wasFaultInjectedRequest);
         WasFaultInjectedResponse wasFaultInjected = parseWasFaultInjectedResponse(wasFaultInjectedResponse);
         return InjectedFaultInfo.builder()
-                .serviceName(wasFaultInjected.getServiceName())
-                .errorCode(wasFaultInjected.getErrorCodeInjected())
+                .serviceName(List.of(wasFaultInjected.getServiceName()))
+                .errorCode(List.of(wasFaultInjected.getErrorCodeInjected()))
                 .build();
     }
 }

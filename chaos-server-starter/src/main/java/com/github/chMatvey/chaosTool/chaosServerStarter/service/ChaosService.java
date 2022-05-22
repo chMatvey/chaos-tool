@@ -5,11 +5,11 @@ import com.github.chMatvey.chaosTool.chaosModels.*;
 import java.util.Optional;
 
 public interface ChaosService {
-    ChaosResponse create(ChaosCreateRequest createRequest);
+    ChaosResponse createChaosSession(ChaosCreateRequest createRequest);
 
-    ChaosResponse update(ChaosUpdateRequest updateRequest);
+    ChaosResponse updateChaosSession(ChaosUpdateRequest updateRequest);
 
-    Optional<ChaosSessionInfoResponse> get(Integer id);
+    Optional<ChaosSessionInfoResponse> getChaosSessionInfo(Integer id);
 
     Optional<WasFaultInjectedResponse> wasFaultInjected(Integer chaosSessionId);
 }

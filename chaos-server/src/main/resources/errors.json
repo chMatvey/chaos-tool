@@ -1,0 +1,17 @@
+{
+  "order": {
+    "api/v1/order": {
+      "POST": [500, 503]
+    }
+  },
+  "warehouse": {
+    "api/v1/warehouse": {
+      "POST": [404, 500, 503]
+    }
+  },
+  "delivery": {
+    "api/v1/delivery": {
+      "POST": [500, 503]
+    }
+  }
+}
